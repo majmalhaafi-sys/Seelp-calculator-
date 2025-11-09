@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sleep & Multi Calculator</title>
+  <style>
+    :root{
+      --accent:#2b6cb0;
+      --muted:#666;
+      --bg:#f7fbff;
+      --card:#ffffff;
+      --radius:12px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45}
+    header{background:linear-gradient(90deg,var(--accent),#4c8ed6);color:#fff;padding:18px 20px}
+    .wrap{max-width:980px;margin:20px auto;padding:18px}
+    .hero{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    h1{margin:0;font-size:20px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .tab{background:transparent;border:1px solid rgba(255,255,255,0.2);padding:8px 12px;border-radius:999px;cursor:pointer;color:#fff}
+    main{max-width:980px;margin:18px auto;padding:18px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(12,32,63,0.06);padding:18px;margin-bottom:16px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:780px){.grid{grid-template-columns:1fr}}
+    label{display:block;font-weight:600;margin-bottom:6px;color:var(--muted)}
+    input, select, button, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef9;background:#fff;box-sizing:border-box}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 12px;cursor:pointer;border-radius:8px}
+    .result{padding:10px;border-radius:8px;background:#f1f8ff;border:1px solid #e6effc;margin-top:10px}
+    .muted{color:var(--muted);font-size:13px}
+    nav.calc-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    nav.calc-tabs button{background:#eef6ff;color:var(--accent);border:1px solid #d7eefe;padding:8px 12px;border-radius:8px}
+    .hidden{display:none}
+    footer{max-width:980px;margin:8px auto;padding:12px;color:var(--muted);font-size:13px}
+    .small{font-size:13px;color:var(--muted)}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    .center{text-align:center}
+    .name-suggest{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{background:#f3f7fb;padding:8px 10px;border-radius:999px;border:1px solid #e6eef9}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <div>
+        <h1>Sleep & Multi Calculator</h1>
+        <div class="small">Simple • Scientific • Sleep • BMI • Age • Loan — Ready for free hosting</div>
+      </div>
+      <div>
+        <div class="tabs">
+          <div class="tab">Sleeping Calculator</div>
+          <div class="tab">All Calculators</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" id="sleep-card">
+      <h2>Sleep Calculator — Best bedtimes</h2>
+      <p class="muted">Pick when you need to wake up (or when you go to bed) and get suggested times based on 90-minute sleep cycles and 15 minutes to fall asleep.</p>
+
+      <div class="grid">
+        <div>
+          <label>Wake-up time</label>
+          <input type="time" id="wakeTime" />
+          <div class="small muted">Or choose when you plan to wake up.</div>
+          <button onclick="calcSleepFromWake()">Get suggested bedtimes</button>
+        </div>
+
+        <div>
+          <label>Bed time</label>
+          <input type="time" id="bedTime" />
+          <div class="small muted">Or choose when you plan to sleep; get suggested wake-up times.</div>
+          <button onclick="calcWakeFromBed()">Get suggested wake-up times</button>
+        </div>
+      </div>
+
+      <div id="sleepResults" class="result hidden"></div>
+    </section>
+
+    <section class="card">
+      <nav class="calc-tabs">
+        <button onclick="showCalc('simple')">Simple</button>
+        <button onclick="showCalc('scientific')">Scientific</button>
+        <button onclick="showCalc('age')">Age</button>
+        <button onclick="showCalc('bmi')">BMI</button>
+        <button onclick="showCalc('loan')">Loan</button>
+        <button onclick="showCalc('custom')">Custom</button>
+      </nav>
+
+      <div id="simple" class="calc-block">
+        <h3>Simple Calculator</h3>
+        <div class="row">
+          <input id="simpleExp" placeholder="Enter expression like 12+34*2" />
+          <button onclick="doSimple()">=</button>
+        </div>
+        <div id="simpleOut" class="result"></div>
+      </div>
+
+      <div id="scientific" class="calc-block hidden">
+        <h3>Scientific Calculator</h3>
+        <div class="row">
+          <input id="sciExp" placeholder="Use sin(), cos(), tan(), sqrt(), pow(x,y), log(), ln()"/>
+          <button onclick="doScientific()">=</button>
+        </div>
+        <div id="sciOut" class="result"></div>
+        <div class="small muted">Examples: sqrt(16), pow(2,8), sin(0.5)</div>
+      </div>
+
+      <div id="age" class="calc-block hidden">
+        <h3>Age Calculator</h3>
+        <label>Date of Birth</label>
+        <input type="date" id="dob" />
+        <button onclick="calcAge()">Calculate Age</button>
+        <div id="ageOut" class="result"></div>
+      </div>
+
+      <div id="bmi" class="calc-block hidden">
+        <h3>BMI Calculator</h3>
+        <div class="grid">
+          <div>
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" placeholder="kg" />
+          </div>
+          <div>
+            <label>Height (cm)</label>
+            <input type="number" id="height" placeholder="cm" />
+          </div>
+        </div>
+        <button onclick="calcBMI()">Calculate BMI</button>
+        <div id="bmiOut" class="result"></div>
+      </div>
+
+      <div id="loan" class="calc-block hidden">
+        <h3>Loan Calculator</h3>
+        <div class="grid">
+          <div>
+            <label>Loan Amount</label>
+            <input type="number" id="loanAmount" placeholder="e.g. 50000" />
+          </div>
+          <div>
+            <label>Annual Interest (%)</label>
+            <input type="number" id="loanInterest" placeholder="e.g. 12" step="0.01" />
+          </div>
+          <div>
+            <label>Term (years)</label>
+            <input type="number" id="loanYears" placeholder="e.g. 3" />
+          </div>
+          <div>
+            <label>Payments per year</label>
+            <select id="paymentsPerYear">
+              <option value="12">Monthly (12)</option>
+              <option value="52">Weekly (52)</option>
+              <option value="4">Quarterly (4)</option>
+              <option value="1">Yearly (1)</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="calcLoan()">Calculate Loan</button>
+        <div id="loanOut" class="result"></div>
+      </div>
+
+      <div id="custom" class="calc-block hidden">
+        <h3>Custom Calculator</h3>
+        <p class="muted">This is a placeholder area for any custom logic you want — e.g. sleep score, nap calculator, or a step counter. Tell me what custom rule you want and I will add it.</p>
+        <textarea id="customInput" rows="3" placeholder="Describe custom calculator or input values..."></textarea>
+        <button onclick="doCustom()">Run Custom</button>
+        <div id="customOut" class="result"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Name suggestions & domain notes</h3>
+      <div class="muted">You wanted a unique name and URL like <code>sleepcalculator.com</code>. Note: <strong>.com</strong> domains are rarely free. Use a free host subdomain or Freenom free TLDs. Below are suggestions:</div>
+      <div class="name-suggest" style="margin-top:8px">
+        <div class="chip">sleepingcalculator</div>
+        <div class="chip">sleep-score</div>
+        <div class="chip">sleep-calc</div>
+        <div class="chip">sleepwise</div>
+        <div class="chip">sleeply</div>
+        <div class="chip">slumbercalc</div>
+        <div class="chip">napcalculator</div>
+      </div>
+      <p class="small muted">Suggested public URLs you can get for free:
+        <ul>
+          <li><strong>GitHub Pages</strong>: <code>yourname.github.io/sleepcalculator</code></li>
+          <li><strong>Netlify</strong>: <code>sleepcalculator.netlify.app</code> (or custom subdomain)</li>
+          <li><strong>Freenom</strong> free domain like: <code>sleepcalculator.tk</code> (connect to Netlify/GitHub)</li>
+        </ul>
+      </p>
+    </section>
+
+    <footer class="card small">
+      <strong>Next steps I can do for you (I will provide files & deployment steps):</strong>
+      <ul>
+        <li>Personalize the site name and colors</li>
+        <li>Make a GitHub repo and push the files (I will give commands)</li>
+        <li>Step-by-step Netlify or GitHub Pages deployment guide</li>
+        <li>Show how to add a Freenom domain and point it</li>
+      </ul>
+    </footer>
+  </main>
+
+  <script>
+    // Utility
+    const $ = id => document.getElementById(id);
+
+    // Tabs
+    function showCalc(name){
+      const blocks = document.querySelectorAll('.calc-block');
+      blocks.forEach(b => b.classList.add('hidden'));
+      $(name).classList.remove('hidden');
+    }
+
+    // SIMPLE
+    function doSimple(){
+      const exp = $('simpleExp').value.trim();
+      try {
+        // safe-ish eval: allow digits, operators, parentheses, dot, spaces
+        if(!/^[0-9+\-*/().\s%]*$/.test(exp)) throw 'Invalid characters';
+        const out = Function('"use strict";return ('+exp+')')();
+        $('simpleOut').innerText = String(out);
+      } catch(e){
+        $('simpleOut').innerText = 'Error: ' + e;
+      }
+    }
+
+    // SCIENTIFIC
+    function doScientific(){
+      let exp = $('sciExp').value.trim();
+      if(!exp){ $('sciOut').innerText = 'Enter expression'; return; }
+      try {
+        // Provide math functions
+        const mathNames = ['sin','cos','tan','sqrt','pow','abs','log','ln','exp','PI','E'];
+        const sandbox = {
+          sin: Math.sin, cos: Math.cos, tan: Math.tan,
+          sqrt: Math.sqrt, pow: Math.pow, abs: Math.abs,
+          log: Math.log10 ? Math.log10 : (x)=>Math.log(x)/Math.LN10,
+          ln: Math.log, exp: Math.exp,
+          PI: Math.PI, E: Math.E
+        };
+        // Replace ln(...) with ln(...) and log(...) as log10 for convenience
+        exp = exp.replace(/\blog\(/g,'log(');
+        // create function with sandbox variables
+        const args = Object.keys(sandbox);
+        const vals = Object.values(sandbox);
+        const fn = new Function(...args, '"use strict"; return ('+exp+');');
+        const res = fn(...vals);
+        $('sciOut').innerText = String(res);
+      } catch(e){
+        $('sciOut').innerText = 'Error: ' + e;
+      }
+    }
+
+    // AGE
+    function calcAge(){
+      const d = $('dob').value;
+      if(!d){ $('ageOut').innerText = 'Choose date of birth'; return; }
+      const dob = new Date(d);
+      const today = new Date();
+      if(dob > today){ $('ageOut').innerText = 'DOB is in the future!'; return; }
+      let years = today.getFullYear() - dob.getFullYear();
+      let m = today.getMonth() - dob.getMonth();
+      if(m < 0 || (m === 0 && today.getDate() < dob.getDate())) years--;
+      const months = (today.getMonth() - dob.getMonth() + 12) % 12;
+      const days = (today.getDate() - dob.getDate());
+      $('ageOut').innerText = years + ' years, approx ' + months + ' months';
+    }
+
+    // BMI
+    function calcBMI(){
+      const w = parseFloat($('weight').value);
+      const hcm = parseFloat($('height').value);
+      if(!w || !hcm){ $('bmiOut').innerText = 'Enter weight and height'; return; }
+      const h = hcm/100;
+      const bmi = w / (h*h);
+      let cat = '';
+      if(bmi < 18.5) cat = 'Underweight';
+      else if(bmi < 25) cat = 'Normal';
+      else if(bmi < 30) cat = 'Overweight';
+      else cat = 'Obese';
+      $('bmiOut').innerHTML = 'BMI: <strong>'+bmi.toFixed(2)+'</strong> — '+cat;
+    }
+
+    // LOAN
+    function calcLoan(){
+      const P = parseFloat($('loanAmount').value);
+      const annual = parseFloat($('loanInterest').value);
+      const years = parseFloat($('loanYears').value);
+      const nperYear = parseInt($('paymentsPerYear').value);
+      if(!P || !annual || !years){ $('loanOut').innerText = 'Enter amount, interest and years'; return; }
+      const r = (annual/100) / nperYear;
+      const n = years * nperYear;
+      let payment;
+      if(r === 0) payment = P / n;
+      else payment = P * r / (1 - Math.pow(1 + r, -n));
+      const total = payment * n;
+      const totalInterest = total - P;
+      $('loanOut').innerHTML = `Payment: <strong>${payment.toFixed(2)}</strong> per period<br/>Total pay: <strong>${total.toFixed(2)}</strong><br/>Total interest: <strong>${totalInterest.toFixed(2)}</strong>`;
+    }
+
+    // CUSTOM (placeholder)
+    function doCustom(){
+      const txt = $('customInput').value.trim();
+      if(!txt) $('customOut').innerText = 'Describe what custom calculation you want (e.g., sleep score formula)';
+      else $('customOut').innerText = 'Thanks — tell me exactly what you want and I will add it here.';
+    }
+
+    // Sleep Calculator: uses 90-minute sleep cycles, and 15 minutes to fall asleep
+    function formatTime(date){
+      const hh = date.getHours().toString().padStart(2,'0');
+      const mm = date.getMinutes().toString().padStart(2,'0');
+      return hh+':'+mm;
+    }
+    function addMinutesToTime(timeStr, minutes){
+      const [hh,mm] = timeStr.split(':').map(Number);
+      const d = new Date();
+      d.setHours(hh,mm,0,0);
+      d.setMinutes(d.getMinutes() + minutes);
+      return d;
+    }
+
+    function calcSleepFromWake(){
+      const wake = $('wakeTime').value;
+      if(!wake){ alert('Choose wake-up time'); return; }
+      // recommended cycles: 6,5,4 cycles -> 9h,7.5h,6h; include 15 minutes to fall asleep
+      const cycles = [6,5,4,3];
+      const results = cycles.map(c => {
+        const minutes = c * 90 + 15; // include 15 to fall asleep
+        const t = addMinutesToTime(wake, -minutes);
+        return {cycles:c, time: formatTime(t), hours: (minutes/60).toFixed(2)};
+      });
+      let html = '<strong>Suggested bedtimes (include ~15 min to fall asleep):</strong><ul>';
+      results.forEach(r => {
+        html += `<li>${r.time} — ${r.cycles} cycles (~${r.hours} hrs)</li>`;
+      });
+      html += '</ul><div class="muted">Tip: Most adults need 4–6 cycles (6–9 hours). Choose what fits you.</div>';
+      $('sleepResults').classList.remove('hidden');
+      $('sleepResults').innerHTML = html;
+      // scroll to results
+      $('sleepResults').scrollIntoView({behavior:'smooth'});
+    }
+
+    function calcWakeFromBed(){
+      const bed = $('bedTime').value;
+      if(!bed){ alert('Choose bed time'); return; }
+      const cycles = [3,4,5,6];
+      const results = cycles.map(c => {
+        const minutes = c * 90 + 15;
+        const t = addMinutesToTime(bed, minutes);
+        return {cycles:c, time: formatTime(t), hours: (minutes/60).toFixed(2)};
+      });
+      let html = '<strong>Suggested wake-up times (assumes ~15 min to fall asleep):</strong><ul>';
+      results.forEach(r => {
+        html += `<li>${r.time} — ${r.cycles} cycles (~${r.hours} hrs)</li>`;
+      });
+      html += '</ul><div class="muted">If you want to wake at a specific time, use the wake-up field to find matching bedtimes.</div>';
+      $('sleepResults').classList.remove('hidden');
+      $('sleepResults').innerHTML = html;
+      $('sleepResults').scrollIntoView({behavior:'smooth'});
+    }
+
+    // initial show
+    showCalc('simple');
+  </script>
+</body>
+</html>
